@@ -1,0 +1,38 @@
+fastapi
+uvicorn[standard]
+pydantic[email]
+python-dotenv
+groq
+jinja2
+
+# Database
+sqlalchemy
+psycopg2-binary       # PostgreSQL driver
+aiosqlite         # async SQLite (optional)
+
+# RAG
+langchain
+langchain-community
+langchain-text-splitters   # imported directly by rag_service; was only ever a transitive dep
+faiss-cpu
+sentence-transformers
+pypdf
+
+# NOTE ON PINS: these are deliberately loose, but that has bitten this project
+# before — `passlib[bcrypt]` unpinned resolved to a bcrypt release passlib could
+# not use, and every login crashed on a fresh install. Before submission, freeze
+# a known-good set:  pip freeze > requirements.lock.txt
+
+# Utils
+requests
+python-multipart
+feedparser
+redis                 # shared rate-limit store (required in production)
+
+# PDF generation
+reportlab
+
+# Auth
+python-jose[cryptography]
+bcrypt>=4.0            # used directly; passlib dropped (incompatible with bcrypt>=4.1)
+firebase-admin

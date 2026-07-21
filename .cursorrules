@@ -1,0 +1,205 @@
+# Pakistan LegalAI — Cursor Rules
+# Author: Antigravity | Version: 5.0.0
+
+You are assisting with the **Pakistan LegalAI** project — an AI-powered legal assistance platform for Pakistani citizens. Follow these conventions precisely when writing, debugging, or modifying code in this workspace.
+
+---
+
+## Project Architecture & Stack
+
+1. **Backend (`backend/`)** — FastAPI, Python 3.11, SQLAlchemy, SQLite, Uvicorn, FAISS, Sentence Transformers, Groq API (LLaMA-3.3-70B), ReportLab.
+2. **React Frontend (`react-frontend/`)** — Create React App, React 18, single-file SPA architecture.
+
+> The legacy Streamlit frontend (`frontend/`) is deprecated — do not add features to it.
+
+---
+
+## Critical File Locations
+
+```
+backend/main.py                      FastAPI entry — all router registrations
+backend/routers/                     auth.py, chat.py, search.py, documents.py, rights.py, news.py
+backend/services/llm_service.py      Groq LLaMA-3.3-70B client
+backend/services/rag_service.py      FAISS retrieval (threshold: 0.75)
+backend/services/doc_service.py      Jinja2 templates + ReportLab PDF generation
+backend/db/models.py                 Case, Topic SQLAlchemy models
+backend/db/auth_models.py            User model
+backend/db/database.py               Engine, SessionLocal, get_db
+backend/data/laws/                   Law PDFs for RAG (currently empty)
+backend/data/faiss_index/            FAISS output: index.faiss + index.pkl
+
+react-frontend/src/App.jsx           ALL pages, styles, navigation, components (~2100 lines)
+react-frontend/src/components/       Layout.jsx
+react-frontend/src/pages/            Dashboard.jsx only
+react-frontend/package.json          proxy = http://localhost:8000
+```
+
+---
+
+## Frontend Architecture
+
+### Single-File Rule
+**All pages live in `react-frontend/src/App.jsx`.** This is intentional — do not create new files in `src/pages/` unless the user explicitly asks to split the file.
+
+### Navigation
+The app uses **custom `useState`-based SPA routing** — no React Router DOM.
+```jsx
+// Root App component holds:
+const [page, setPage] = useState("home");
+const go = (id) => setPage(id);
+```
+- To add a page: add `{id:"mypage", l:"Label"}` to the `links` array in `Nav`, then handle `page === "mypage"` in the main render block.
+- Pass `go` as a prop to pages that need navigation.
+
+### Styling — CSS-in-JS
+All styles are defined in `getCSS(theme)` at the top of `App.jsx` and injected into a `<style>` tag at runtime. Design tokens are CSS custom properties:
+
+```css
+--gold: #c9a84c     /* buttons, highlights, active borders */
+--ink / --ink2      /* body text */
+--bg / --bg2        /* page backgrounds */
+--surface / --surface2 / --surface3   /* card levels */
+--teal: #2a9d8f     /* accents, streaming cursor */
+--border / --border2  /* subtle dividers */
+```
+
+- Add new styles inside `getCSS(theme)`.
+- **Never** create separate `.css` files.
+- **Never** use Tailwind utility classes in JSX — the project does not use Tailwind.
+- **Never** use `@apply` directives.
+
+### Icons
+Use the built-in `<Ico n="..." s={18} c="currentColor"/>` SVG component — do **not** install Lucide React or any icon library.
+
+Available keys: `scale msg srch file shld send user out spk chk arr dn up dl book faq map gavel abc warn copy star note phone close sun moon verify mic micoff tup tdn hist plus trash scan cam cal clk brief tag rf up2 news`
+
+### API Calls
+Three wrappers live in `App.jsx` (top of file):
+```js
+const BASE = "";  // CRA proxy → http://localhost:8000
+
+apiFetch(path)           // GET with auth header
+apiPost(path, body)      // POST JSON with auth header
+apiBlob(path, body)      // POST, returns Blob (PDF download)
+```
+- **Never** hardcode `http://localhost:8000` — use `BASE + path` which resolves to `/api/...` via the proxy.
+- **Never** call Anthropic, Groq, or any LLM API directly from the browser.
+
+### Auth
+- JWT stored in `localStorage` as **`"access_token"`** (not `"token"`).
+- Refresh token: `"refresh_token"`.
+- All wrappers auto-attach `Authorization: Bearer <access_token>`.
+- Logout: `localStorage.clear()`.
+
+### Animations
+CSS keyframe animations defined inside `getCSS()`:
+- `.fu` — fadeUp (`.6s` fade-in from below)
+- `.stream-cursor::after` — blinking cursor for streaming
+- `.d1 .d2 .d3` — typing dots
+- Custom: `animation:"float 4s ease-in-out infinite"` inline style
+
+Do **not** add Framer Motion — use CSS animations.
+
+### Component Patterns
+- Spinner: `<Spin/>` (built-in inline spinner)
+- Markdown: `<MarkdownBubble content={text}/>` (uses `marked.parse()`)
+- Cards: `className="card"` with optional modifiers `card-gold`, `card-purple`
+- Buttons: `className="btn-primary"`, `btn-gold"`, `btn-outline"`, `btn-ghost"`
+- Inputs: `className="inp"`
+- Badges: `className="badge bt/bg/bb/bp/br/bgr"` (teal/gold/blue/purple/red/green)
+- Layout containers: `.wrap` (max 1200px), `.wrap-sm` (max 820px)
+
+---
+
+## Backend Rules
+
+### Setup
+```powershell
+cd backend
+.\venv\Scripts\Activate.ps1
+python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+IDE "module not found" errors are **false positives** — the venv has the packages, system Python does not. Existing `# pyrefly: ignore` comments handle this.
+
+### Patterns
+- Each feature = one router file in `backend/routers/`, registered in `main.py`.
+- DB access: `db: Session = Depends(get_db)` in every route — never `SessionLocal()` directly in a route.
+- All LLM calls go through `llm_service.py` (`llm_service.chat()` or `llm_service.stream()`).
+- All secrets in `backend/.env`. Never hardcode keys.
+- SSE streaming: `StreamingResponse` with `media_type="text/event-stream"`.
+- Logging: `logger = logging.getLogger(__name__)` per module. No `print()` in routers/services.
+
+### Python Style
+- Type hints on all function signatures.
+- Pydantic models for all request/response schemas.
+- `async def` for route handlers.
+
+### RAG Strictness
+- FAISS similarity threshold stays at `0.75` — do not lower without discussion.
+- When no context found, return the strict fallback:
+  > "I don't have specific information about this in my Pakistan law database. Please consult a qualified Pakistani lawyer for guidance."
+- Never hallucinate citations. Always use specific Pakistani Acts (PPC, CrPC, MFLO, CPC, PECA, NAB) with section numbers.
+- Never reference Indian laws (IPC) in place of Pakistani law (PPC).
+
+### Document Generation
+- Jinja2 templates in `doc_service.py`. Fall back to `.txt` if ReportLab fails.
+- All generated PDFs include a legal disclaimer footer.
+
+---
+
+## API Endpoints Reference
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | /api/auth/register | No | User registration |
+| POST | /api/auth/login | No | Login → JWT |
+| POST | /api/chat/stream | No | SSE streaming chat |
+| POST | /api/search | No | Case law search |
+| GET | /api/documents | Yes | List user documents |
+| POST | /api/documents/generate | Yes | Generate PDF |
+| POST | /api/documents/scan | Yes | Analyze PDF/text |
+| GET | /api/rights | No | Legal rights articles |
+| GET | /api/news | No | Legal news feed |
+| GET | /health | No | Health check |
+| GET | /docs | No | FastAPI Swagger UI |
+
+---
+
+## Code Quality Rules
+
+- No comments explaining WHAT code does — only WHY when non-obvious.
+- No docstrings longer than one line.
+- No error handling for impossible/internal scenarios.
+- No abstractions for hypothetical future requirements.
+- No half-finished stubs or placeholder implementations.
+- Prefer editing existing files over creating new ones.
+- Match the style and patterns in the file being edited.
+- No debug `console.log` or `print()` statements in committed code.
+- Use `const`/`let` in JS, type hints in Python — never `var`.
+
+---
+
+## Known Gaps (Do Not Work Around Without Discussing)
+
+- `backend/data/laws/` is empty — FAISS RAG is inactive.
+- Rate limiter is in-memory only — not Redis-backed.
+- JWT in `localStorage` — security debt, acknowledged.
+- No unit tests or integration tests.
+- Document Scanner image mode unsupported (Groq lacks vision API).
+
+---
+
+## Start Commands
+
+```powershell
+# Backend
+cd backend && .\venv\Scripts\Activate.ps1 && python -m uvicorn main:app --reload --port 8000
+
+# Frontend
+cd react-frontend && npm start     # http://localhost:3000
+
+# FastAPI docs → http://localhost:8000/docs
+
+# Rebuild FAISS (after adding PDFs to backend/data/laws/)
+cd backend && .\venv\Scripts\Activate.ps1 && python scripts/ingest_laws.py
+```

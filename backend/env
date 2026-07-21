@@ -1,0 +1,63 @@
+# ─── LLM ────────────────────────────────────────────────────────────
+GROQ_API_KEY=your_groq_api_key_here
+
+# ─── Backend ─────────────────────────────────────────────────────────
+BACKEND_URL=http://localhost:8000
+
+# ─── Database ─────────────────────────────────────────────────────────
+# SQLite (default, zero setup — great for development):
+DATABASE_URL=sqlite:///./legalai.db
+
+# PostgreSQL (for production / Docker):
+# DATABASE_URL=postgresql://legalai:legalai_pass@localhost:5432/legalai
+
+# ─── App ─────────────────────────────────────────────────────────────
+APP_ENV=development
+LOG_LEVEL=info
+
+# ─── Auth ─────────────────────────────────────────────────────────────
+# REQUIRED. Leave blank here on purpose: the app refuses to start in
+# production with a blank/placeholder value, and generates a random
+# ephemeral key in development.
+# Generate:  python -c "import secrets; print(secrets.token_hex(32))"
+JWT_SECRET_KEY=3a1b8c0d9e2f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+REFRESH_TOKEN_EXPIRE_DAYS=30
+
+# Bootstrap super-admin: this email is promoted to admin on first
+# login/registration. Authorisation is role-based (users.role); this only
+# seeds the very first admin so the panel isn't locked out on a fresh DB.
+ADMIN_EMAIL=legalrag.ai@gmail.com
+
+# ─── Rate limiting ────────────────────────────────────────────────────
+# Shared across uvicorn workers and survives restarts.
+# REQUIRED when APP_ENV=production; falls back to in-memory in dev.
+REDIS_URL=redis://localhost:6379/0
+RATE_LIMIT_CALLS=120
+RATE_LIMIT_PERIOD=60
+
+# ─── CORS ────────────────────────────────────────────────────────────
+CORS_ORIGINS=http://localhost:3000,http://localhost:8501
+
+# ─── Email (OTP for Google login) ────────────────────────────────────
+# Gmail: create an App Password at https://myaccount.google.com/apppasswords
+#        2-Step Verification must be enabled first.
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=legalrag.ai@gmail.com
+SMTP_PASS=aekc ofjj fxyl midf
+EMAIL_FROM=legalRag Ai <legalrag.ai@gmail.com>
+
+# ─── RAG retrieval ────────────────────────────────────────────────────
+# Embedding model. Multilingual by default because the app answers in Urdu
+# and its users write Roman Urdu; the English-only model scored native Urdu
+# queries at chance. Changing this REQUIRES rebuilding the index
+# (python scripts/ingest_laws.py) — the app refuses to load an index built
+# with a different model rather than return confident nonsense.
+RAG_EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+
+# L2 distance cutoff for "did we find a relevant statute?".
+# Model- and corpus-specific — re-measure with scripts/eval_retrieval.py after
+# changing either. Measured optimum for the default model: 1.05
+# (keeps 16/17 real questions, admits 0/6 nonsense ones).
+RAG_SIMILARITY_THRESHOLD=1.05

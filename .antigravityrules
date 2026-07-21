@@ -1,0 +1,53 @@
+# Pakistan LegalAI - Antigravity Agent Rules
+
+These rules configure the **Antigravity AI Agent** when executing modifications, coding tasks, or research inside the **Pakistan LegalAI** workspace.
+
+---
+
+## 🛠️ Tool Usage & Command Guidelines
+
+1. **Terminal Commands**:
+   - Prefer executing commands directly on the user's system via the `run_command` tool (PowerShell on Windows).
+   - **Never propose a `cd` command** (use the `Cwd` parameter in the tool call).
+   - If running a long-running process, launch it asynchronously and let the system notify you of updates. Do not block or poll.
+
+2. **File Editing**:
+   - Always specify `TargetFile` as the first argument in file writing and editing tools.
+   - Use `replace_file_content` for a single contiguous block of edits.
+   - Use `multi_replace_file_content` for multiple non-contiguous edits in the same file. Do not make parallel calls for the same file.
+   - Preserve all existing comments and docstrings unless explicitly asked otherwise.
+
+3. **Background Tasks & Scheduling**:
+   - Use the `schedule` tool for timers instead of running a background `sleep` shell command.
+   - Use `manage_task` with action `status`, `send_input`, or `kill` to interact with background tasks.
+
+---
+
+## 📋 Planning & Execution Workflow
+
+1. **Research & Plan**:
+   - Before implementing complex changes, research the codebase and write an `implementation_plan.md` in the artifacts directory.
+   - Prompt the user for feedback by setting `RequestFeedback: true` in the plan's metadata.
+   - **Wait for explicit user approval** before writing task lists or code.
+
+2. **Task Tracking & Delivery**:
+   - Once approved, create or update `task.md` in the artifacts directory. Track each step using `[ ]`, `[/]`, and `[x]`.
+   - After completion, document the results in `walkthrough.md` with links to modified files.
+
+---
+
+## 🎨 Web Application Development & Aesthetics
+
+1. **Premium Visuals**:
+   - Web application UIs must feel extremely premium, responsive, and modern.
+   - Do not use generic colors (e.g. pure red, blue, green). Use harmonious HSL palettes, dark modes, and soft gradients.
+   - Incorporate subtle micro-animations (transitions, hover scales, fades) to make the UI feel alive.
+   - Use premium fonts (e.g., Google Fonts like Inter or Outfit) instead of default system serifs/sans-serifs.
+
+2. **No Placeholders**:
+   - Do not write placeholder text or empty image boxes. If an image asset is required, use the `generate_image` tool to render it, save it, and reference it.
+
+3. **SEO & Hierarchy**:
+   - Use semantic HTML5 elements (`<article>`, `<section>`, `<nav>`, `<header>`, `<footer>`).
+   - Limit to one `<h1>` per page.
+   - Every interactive component must have a unique, descriptive `id` attribute.

@@ -1,0 +1,71 @@
+# Environment
+# NOTE: `*.env` matches files ENDING in .env -- it did NOT match `env.local`,
+# which is how a live Gmail app password ended up committed. Be explicit.
+.env
+*.env
+.env.*
+env.local
+env.*.local
+*env local*
+!.env.example
+!.env.development
+!.env.local.example
+
+# Node
+node_modules/
+npm-debug.log*
+
+# SQLite DB
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+
+# Firebase service account (contains private keys)
+firebase-service-account.json
+
+# Batch fix scripts
+backend/*.bat
+backend/*.env.devlopment
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+env/
+.venv/
+
+# Data (large files — add selectively)
+backend/data/faiss_index/
+backend/data/config.json
+backend/data/laws/*.pdf
+backend/data/laws/*.PDF
+*.pdf
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.log
+/tmp/
+
+# Frontend build
+react-frontend/build/

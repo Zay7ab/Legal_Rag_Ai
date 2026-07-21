@@ -1,0 +1,608 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=Public+Sans:ital,wght@0,300..800;1,400..600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* Urdu is loaded separately: it's a large face and only needed when the user
+   switches language, so it must not block first paint for everyone else. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { color-scheme: light; }
+  .dark { color-scheme: dark; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-variant-numeric: tabular-nums;
+    /* Base gradient only. The bg.jpg texture is painted by a dedicated fixed
+       layer in App.jsx (#app-bg) so it renders reliably on mobile, where
+       `background-attachment: fixed` on the body is buggy/ignored. */
+    background-image:
+      radial-gradient(120% 80% at 50% 0%, #F4F8F3 0%, #EDF1EC 55%, #E6EDE6 100%);
+    background-repeat: no-repeat;
+  }
+  .dark body {
+    @apply bg-well text-paper;
+    background-image:
+      radial-gradient(120% 80% at 50% 0%, #0D1815 0%, #070D0B 60%, #050A08 100%);
+    background-repeat: no-repeat;
+  }
+
+  /* Quality floor: visible keyboard focus everywhere, never removed. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-seal ring-offset-2 ring-offset-paper;
+  }
+  .dark :focus-visible { @apply ring-seal-bright ring-offset-well; }
+
+  ::selection { @apply bg-seal-tint text-ink; }
+  .dark ::selection { @apply bg-seal text-paper; }
+
+  /* Respect the OS setting rather than animating regardless. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ── Signature: the stamp-paper rule ──────────────────────────────────────
+     Pakistani legal instruments are executed on judicial stamp paper, which
+     carries a fine double rule with ticked corners. That frame is this
+     product's signature: it marks a surface as "this is an instrument of
+     record" — used on AI answers and generated documents, nowhere else.
+     Everything around it stays quiet so this reads as the one memorable mark. */
+  .stamp {
+    @apply relative overflow-hidden rounded-card border border-paper-3 bg-white shadow-lift;
+    /* Was a bordered box. Now it sits on the page: a warm inner top edge (light
+       falling on paper) plus real elevation. This is the product's signature —
+       it should look like an object, not a div. */
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.9),
+      0 2px 5px rgba(10,15,13,.07),
+      0 16px 32px -12px rgba(10,15,13,.22);
+  }
+  .dark .stamp {
+    @apply bg-well-2 border-well-3;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.05),
+      0 2px 6px rgba(0,0,0,.4),
+      0 20px 44px -16px rgba(0,0,0,.6);
+  }
+
+  /* Slow sheen across the stamp frame. Low contrast on purpose: it should
+     reward a second look, not demand the first. */
+  .stamp-live::before {
+    content: "";
+    @apply pointer-events-none absolute inset-y-0 -left-1/3 z-[1] w-1/3 animate-sheen;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+  }
+  .dark .stamp-live::before {
+    background: linear-gradient(100deg, transparent, rgba(111,227,188,.06), transparent);
+  }
+  @media (prefers-reduced-motion: reduce) { .stamp-live::before { display: none; } }
+
+  .stamp::before {
+    content: "";
+    @apply pointer-events-none absolute rounded-[2px] border border-paper-3/70;
+    inset: 5px;
+  }
+  .dark .stamp::before { @apply border-well-3/80; }
+
+  /* Corner ticks — the detail that makes it read as stamp paper rather than
+     as a card with two borders. */
+  .stamp::after {
+    content: "";
+    @apply pointer-events-none absolute;
+    inset: 5px;
+    background:
+      linear-gradient(theme(colors.seal.DEFAULT), theme(colors.seal.DEFAULT)) 0 0/7px 1px no-repeat,
+      linear-gradient(theme(colors.seal.DEFAULT), theme(colors.seal.DEFAULT)) 0 0/1px 7px no-repeat,
+      linear-gradient(theme(colors.seal.DEFAULT), theme(colors.seal.DEFAULT)) 100% 0/7px 1px no-repeat,
+      linear-gradient(theme(colors.seal.DEFAULT), theme(colors.seal.DEFAULT)) 100% 0/1px 7px no-repeat,
+      linear-gradient(theme(colors.seal.DEFAULT), theme(colors.seal.DEFAULT)) 0 100%/7px 1px no-repeat,
+      linear-gradient(theme(colors.seal.DEFAULT), theme(colors.seal.DEFAULT)) 0 100%/1px 7px no-repeat,
+      linear-gradient(theme(colors.seal.DEFAULT), theme(colors.seal.DEFAULT)) 100% 100%/7px 1px no-repeat,
+      linear-gradient(theme(colors.seal.DEFAULT), theme(colors.seal.DEFAULT)) 100% 100%/1px 7px no-repeat;
+    opacity: .5;
+  }
+  .dark .stamp::after { opacity: .65; }
+
+  /* ── Eyebrow: a label, set as data ─────────────────────────────────────── */
+  .eyebrow {
+    @apply font-mono text-2xs uppercase tracking-[.14em] text-ink-3;
+  }
+  .dark .eyebrow { @apply text-paper-3/60; }
+
+  /* ── Prose for LLM answers ─────────────────────────────────────────────── */
+  .answer { @apply text-[15px] leading-[1.75] text-ink-2; }
+  .dark .answer { @apply text-paper-2/90; }
+  .answer > * + * { @apply mt-3; }
+  .answer strong { @apply font-semibold text-ink; }
+  .dark .answer strong { @apply text-paper; }
+  .answer ul { @apply list-disc ps-5 space-y-1.5; }
+  .answer ol { @apply list-decimal ps-5 space-y-1.5; }
+  .answer h1,.answer h2,.answer h3 {
+    @apply font-display font-semibold text-ink mt-5 mb-1.5 text-[17px];
+  }
+  .dark .answer h1,.dark .answer h2,.dark .answer h3 { @apply text-paper; }
+  .answer code {
+    @apply font-mono text-[12.5px] bg-paper-2 px-1 py-0.5 rounded-[2px];
+  }
+  .dark .answer code { @apply bg-well-3; }
+  .answer pre { @apply bg-paper-2 p-3 rounded-card overflow-x-auto text-[12.5px]; }
+  .dark .answer pre { @apply bg-well-3; }
+  .answer a { @apply text-seal underline underline-offset-2; }
+  .dark .answer a { @apply text-seal-bright; }
+  .answer blockquote {
+    @apply border-s-2 border-seal/40 ps-3 italic text-ink-3;
+  }
+  .answer table { @apply w-full text-[13px] border-collapse; }
+  .answer th, .answer td { @apply border border-paper-3 px-2 py-1.5 text-start; }
+  .dark .answer th, .dark .answer td { @apply border-well-3; }
+
+  /* A citation inside an answer. Looks like a link because it behaves like one:
+     it opens the enacted text. This is the product's core promise made clickable
+     rather than merely asserted. */
+  .cite-link {
+    @apply font-mono text-[0.92em] font-medium text-seal underline decoration-seal/30
+           underline-offset-2 transition-colors;
+  }
+  .cite-link:hover { @apply decoration-seal bg-seal-tint/60 rounded-[2px]; }
+  .dark .cite-link { @apply text-seal-bright decoration-seal-bright/30; }
+  .dark .cite-link:hover { @apply decoration-seal-bright bg-seal/20; }
+
+  /* Urdu answers need real line height for Nastaliq's descenders. */
+  .answer-ur { @apply font-urdu text-[17px] leading-[1.8]; direction: rtl; text-align: right; }
+
+  /* ── Urdu interface ──────────────────────────────────────────────────────
+     Set on <html> by LangProvider. Nastaliq has deep descenders and long
+     ligatures, so it needs extra vertical space and larger base sizes. */
+  .urdu body { @apply font-urdu text-[15px]; }
+  .urdu { line-height: 1.85; }
+  .urdu button, .urdu input, .urdu select, .urdu span, .urdu h1, .urdu h2, .urdu h3, .urdu label, .urdu a {
+    line-height: 1.85;
+  }
+  .urdu p, .urdu textarea, .urdu blockquote, .urdu li {
+    line-height: 2.2;
+  }
+  /* Form element overrides to prevent character clipping in Nastaliq */
+  .urdu input, .urdu select {
+    @apply h-11 py-2 text-[14px];
+  }
+  .urdu textarea {
+    @apply py-3 leading-[2.0];
+  }
+  .urdu button {
+    @apply h-11 text-[13.5px];
+  }
+  /* The eyebrow is mono + wide tracking — meaningless and unreadable in
+     Nastaliq, so it falls back to the normal face without letter-spacing. */
+  .urdu .eyebrow { @apply font-urdu tracking-normal text-[11.5px] leading-relaxed; }
+  /* Directional icons must mirror in RTL; a "next" arrow pointing right is
+     backwards when the text runs right-to-left. */
+  .urdu [data-flip] { transform: scaleX(-1); }
+
+  /* Thin, unobtrusive scrollbars. */
+  .scroll-thin { scrollbar-width: thin; scrollbar-color: theme(colors.paper.3) transparent; }
+  .scroll-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scroll-thin::-webkit-scrollbar-thumb { @apply bg-paper-3 rounded-full; }
+  .dark .scroll-thin::-webkit-scrollbar-thumb { @apply bg-well-3; }
+  .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+
+  /* Glassmorphism panel styling */
+  .glass {
+    @apply rounded-card backdrop-blur-md bg-white/70 border border-paper-3 dark:border-well-3 shadow-lift;
+  }
+  .dark .glass {
+    @apply bg-well-2/70 border-white/10;
+  }
+
+  /* Springy micro-interaction lift with ambient shadows */
+  .lift {
+    @apply transition-all duration-300 ease-crisp;
+  }
+  .lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 12px rgba(10,15,13,.04),
+      0 12px 24px -6px rgba(10,15,13,.1);
+  }
+  .dark .lift:hover {
+    box-shadow:
+      0 4px 14px rgba(0,0,0,.3),
+      0 16px 36px -10px rgba(0,0,0,.5);
+  }
+}
+
+
+@layer utilities {
+  /* Sections arrive as you reach them. Pure CSS via animation-timeline where
+     supported; everywhere else the content is simply visible, which is the
+     correct fallback — never hide content behind an effect that might not run. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        animation: reveal linear both;
+        animation-timeline: view();
+        animation-range: entry 8% cover 26%;
+      }
+    }
+  }
+
+  /* Text that needs to carry a page. Optical sizing + tighter tracking at
+     display sizes — the difference between "big text" and typography. */
+  .display {
+    font-optical-sizing: auto;
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+  }
+
+  .hairline { @apply border-paper-3/70 dark:border-well-3; }
+}
+
+/* Chat background loader animation styling */
+.chat-bg-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.chat-bg-loader .loader {
+  --color-one: #EBB542; /* Brass Gold */
+  --color-two: #0B5341; /* Seal Green */
+  --time-animation: 4s;
+  --size: 2.4; /* Large centerpiece */
+  position: relative;
+  border-radius: 50%;
+  transform: scale(var(--size));
+  box-shadow:
+    0 0 35px 0 rgba(235, 181, 66, 0.35),
+    0 25px 60px 0 rgba(11, 83, 65, 0.4);
+  animation: colorize calc(var(--time-animation) * 3) ease-in-out infinite;
+}
+
+.chat-bg-loader .loader::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border-top: solid 2.5px var(--color-one);
+  border-bottom: solid 2.5px var(--color-two);
+  background: linear-gradient(180deg, rgba(235, 181, 66, 0.15), rgba(11, 83, 65, 0.25));
+  box-shadow:
+    inset 0 10px 10px 0 rgba(235, 181, 66, 0.25),
+    inset 0 -10px 10px 0 rgba(11, 83, 65, 0.3);
+}
+
+.chat-bg-loader .loader .box {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(
+    180deg,
+    var(--color-one) 20%,
+    var(--color-two) 80%
+  );
+  mask: url(#clipping);
+  -webkit-mask: url(#clipping);
+}
+
+.chat-bg-loader .loader svg {
+  position: absolute;
+}
+
+.chat-bg-loader .loader svg #clipping {
+  filter: contrast(15);
+  animation: roundness calc(var(--time-animation) / 2) linear infinite;
+}
+
+.chat-bg-loader .loader svg #clipping polygon {
+  filter: blur(7px);
+}
+
+.chat-bg-loader .loader svg #clipping polygon:nth-child(1) {
+  transform-origin: 75% 25%;
+  transform: rotate(90deg);
+}
+
+.chat-bg-loader .loader svg #clipping polygon:nth-child(2) {
+  transform-origin: 50% 50%;
+  animation: rotation var(--time-animation) linear infinite reverse;
+}
+
+.chat-bg-loader .loader svg #clipping polygon:nth-child(3) {
+  transform-origin: 50% 60%;
+  animation: rotation var(--time-animation) linear infinite;
+  animation-delay: calc(var(--time-animation) / -3);
+}
+
+.chat-bg-loader .loader svg #clipping polygon:nth-child(4) {
+  transform-origin: 40% 40%;
+  animation: rotation var(--time-animation) linear infinite reverse;
+}
+
+.chat-bg-loader .loader svg #clipping polygon:nth-child(5) {
+  transform-origin: 40% 40%;
+  animation: rotation var(--time-animation) linear infinite reverse;
+  animation-delay: calc(var(--time-animation) / -2);
+}
+
+.chat-bg-loader .loader svg #clipping polygon:nth-child(6) {
+  transform-origin: 60% 40%;
+  animation: rotation var(--time-animation) linear infinite;
+}
+
+.chat-bg-loader .loader svg #clipping polygon:nth-child(7) {
+  transform-origin: 60% 40%;
+  animation: rotation var(--time-animation) linear infinite;
+  animation-delay: calc(var(--time-animation) / -1.5);
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes roundness {
+  0% {
+    filter: contrast(15);
+  }
+  20% {
+    filter: contrast(3);
+  }
+  40% {
+    filter: contrast(3);
+  }
+  60% {
+    filter: contrast(15);
+  }
+  100% {
+    filter: contrast(15);
+  }
+}
+
+@keyframes colorize {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    filter: hue-rotate(-30deg);
+  }
+  40% {
+    filter: hue-rotate(-60deg);
+  }
+  60% {
+    filter: hue-rotate(-90deg);
+  }
+  80% {
+    filter: hue-rotate(-45deg);
+  }
+  100% {
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* Fancy Google Hover Button - Legal AI Theme Customization */
+.google-fancy-btn {
+  padding: 10px 20px;
+  font-weight: 600;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  border-radius: 35px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid theme(colors.seal.DEFAULT);
+  outline: none;
+  background: transparent;
+  color: theme(colors.ink.DEFAULT);
+  cursor: pointer;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.dark .google-fancy-btn {
+  border-color: theme(colors.seal.bright);
+  color: theme(colors.paper.DEFAULT);
+}
+
+.google-fancy-btn .svg {
+  height: 20px;
+  width: 20px;
+  margin-right: 10px;
+  z-index: 6;
+  transition: transform 0.3s ease-in-out;
+}
+
+.google-fancy-btn .text {
+  z-index: 10;
+  font-size: 14.5px;
+  transition: color 0.3s ease-in-out;
+}
+
+.google-fancy-btn:hover .text {
+  animation: googleBtnText forwards 0.3s;
+}
+
+@keyframes googleBtnText {
+  from {
+    color: inherit;
+  }
+  to {
+    color: #EDF1EC; /* Light paper color */
+  }
+}
+
+.google-fancy-btn:hover::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 9%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-radius: 300px;
+  animation: googleWave1 2.2s ease-in-out forwards;
+}
+
+.google-fancy-btn:hover::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 9%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-radius: 300px;
+  animation: googleWave2 2.2s ease-in-out forwards;
+}
+
+@keyframes googleWave1 {
+  0%, 1% {
+    z-index: 1;
+    background: #0B5341; /* Seal Green */
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  25% {
+    z-index: 1;
+    background: #0B5341;
+    width: 800px;
+    height: 800px;
+    opacity: 1;
+  }
+  26% {
+    z-index: 3;
+    background: #46C79E; /* Seal Bright Green */
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  50%, 100% {
+    z-index: 3;
+    background: #46C79E;
+    width: 800px;
+    height: 800px;
+    opacity: 1;
+  }
+}
+
+@keyframes googleWave2 {
+  0%, 11% {
+    z-index: 2;
+    background: #083F31; /* Mid green */
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  35%, 39% {
+    z-index: 2;
+    background: #083F31;
+    width: 800px;
+    height: 800px;
+    opacity: 1;
+  }
+  40% {
+    z-index: 4;
+    background: #052A21; /* Deep Seal Green */
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  64%, 100% {
+    z-index: 4;
+    background: #052A21;
+    width: 800px;
+    height: 800px;
+    opacity: 1;
+  }
+}
+
+.google-fancy-btn:hover .red {
+  animation: disappear 0.1s forwards;
+  animation-delay: 0.1s;
+}
+
+.google-fancy-btn:hover .yellow {
+  animation: disappear 0.1s forwards;
+  animation-delay: 0.3s;
+}
+
+.google-fancy-btn:hover .green {
+  animation: disappear 0.1s forwards;
+  animation-delay: 0.7s;
+}
+
+.google-fancy-btn:hover .blue {
+  animation: disappear 0.1s forwards;
+  animation-delay: 1.1s;
+}
+
+/* Custom background animation and pattern styles */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(11, 83, 65, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(11, 83, 65, 0.05) 1px, transparent 1px);
+}
+
+.dark .bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(70, 199, 158, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(70, 199, 158, 0.04) 1px, transparent 1px);
+}
+
+.grid-mask {
+  mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 80%);
+}
+
+@keyframes blob-float-1 {
+  0% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  33% { transform: translate(30px, -50px) scale(1.1) rotate(120deg); }
+  66% { transform: translate(-20px, 20px) scale(0.9) rotate(240deg); }
+  100% { transform: translate(0px, 0px) scale(1) rotate(360deg); }
+}
+
+@keyframes blob-float-2 {
+  0% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  50% { transform: translate(-40px, 40px) scale(1.2) rotate(-180deg); }
+  100% { transform: translate(0px, 0px) scale(1) rotate(-360deg); }
+}
+
+@keyframes blob-float-3 {
+  0% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+  33% { transform: translate(-10px, -30px) scale(0.85) rotate(-90deg); }
+  66% { transform: translate(40px, 20px) scale(1.1) rotate(90deg); }
+  100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+}
+
+.animate-blob-1 {
+  animation: blob-float-1 25s infinite ease-in-out;
+}
+
+.animate-blob-2 {
+  animation: blob-float-2 30s infinite ease-in-out;
+}
+
+.animate-blob-3 {
+  animation: blob-float-3 20s infinite ease-in-out;
+}
+

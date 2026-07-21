@@ -1,0 +1,80 @@
+# Pakistan LegalAI - Claude Code Rules
+
+These rules outline the engineering practices, commands, and workspace architecture patterns that Claude should follow when working on the **Pakistan LegalAI** project.
+
+---
+
+## 💻 Tech Stack Quick Reference
+
+- **Backend**: FastAPI (Python 3.11), SQLAlchemy, SQLite (Development) / PostgreSQL (Production), Jinja2 (Templating), ReportLab (PDF Generation).
+- **RAG & Search**: LangChain, FAISS Vector Index, HuggingFace embeddings (`all-MiniLM-L6-v2`), Groq API (`llama-3.3-70b-versatile`).
+- **Frontend**: Streamlit (`frontend/`) and React with Tailwind CSS (`react-frontend/`).
+
+---
+
+## 🛠️ Command Reference (Windows / PowerShell)
+
+When testing, launching, or seeding the application:
+
+1. **Activate Python Virtual Environment**:
+   - Path: `backend/venv`
+   - Command: `.\backend\venv\Scripts\Activate.ps1`
+
+2. **Run Backend API Server**:
+   - Location: `backend/`
+   - Command: `uvicorn main:app --reload --port 8000`
+   - URL: http://localhost:8000
+   - Swagger Docs: http://localhost:8000/docs
+
+3. **Run Streamlit Frontend**:
+   - Location: `frontend/`
+   - Command: `streamlit run app.py`
+
+4. **Run React Frontend**:
+   - Location: `react-frontend/`
+   - Installation: `npm install`
+   - Dev Server: `npm run dev` (running on Vite's default port, usually http://localhost:5173 or configured to http://localhost:3000)
+
+5. **Re-build RAG Vector Database**:
+   - Command: `python scripts/ingest_laws.py` (run from the `backend/` directory)
+
+---
+
+## 📝 Coding Standards & Architecture
+
+### Backend (Python / FastAPI)
+
+1. **Explicit Routing**:
+   - All API endpoints must be declared inside a router in `backend/routers/` and mounted onto the main FastAPI instance in `backend/main.py`.
+   - Use Pydantic models for request and response validation.
+
+2. **RAG Integration**:
+   - The RAG system in `services/rag_service.py` uses FAISS. Ensure that any PDF or TXT source documents are placed in `backend/data/laws/` before indexing.
+   - When RAG context is empty, you **MUST** trigger a fallback responses with the strict message:
+     *"I don't have specific information about this in my Pakistan law database. This query may not be covered under Pakistani law or my legal corpus. Please consult a qualified Pakistani lawyer for guidance."*
+   - Avoid general LLM knowledge fallback if a query is legal but lacks context in the database to prevent hallucinations.
+   - Cite laws with specific section details, e.g. "Section 302 of the Pakistan Penal Code (PPC)". Do not reference non-Pakistani statutes.
+
+3. **Database Rules**:
+   - Use SQLAlchemy session handling dependencies in routes. Ensure sessions are yielded and closed properly using context managers or FastAPI `Depends(get_db)`.
+   - Perform migrations or table setup inside `db/database.py`'s `init_db` function, or use Alembic if migrations are enabled.
+
+### Frontend (React / Tailwind)
+
+1. **State & Architecture**:
+   - Keep page components cleanly separated in `react-frontend/src/pages/`.
+   - If a page grows, modularize its layout components. Do not lump massive forms or charts into a single file.
+   - Use `react-frontend/src/api/client.js` for all fetch requests.
+
+2. **Design Guidelines**:
+   - Adhere to custom design guidelines: use beautiful gradients, glassmorphism, responsive grids, and soft shadow styles. Avoid browser-default styles.
+   - Design both light and dark modes where appropriate (`dark:` variant).
+   - Use unique and descriptive `id` attributes on interactive elements (inputs, buttons, select boxes) to allow automated tests to locate them easily.
+
+---
+
+## 🔍 Code Diagnostics & Health Checks
+
+Before submitting changes, test the endpoints:
+- Fetch `http://localhost:8000/health` to verify the DB connectivity, user table, case count, and Groq setup.
+- Fetch `http://localhost:8000/api/rag/status` to view index state and ingested laws count.

@@ -1,0 +1,11 @@
+# ─── Firebase (Google Sign-In) ────────────────────────────────────────
+REACT_APP_FIREBASE_API_KEY=AIzaSyDqV3iSTmS3s_1Ypoo29KMqCX-1zsWdLQg
+REACT_APP_FIREBASE_AUTH_DOMAIN=legalrag-fyp.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=legalrag-fyp
+REACT_APP_FIREBASE_STORAGE_BUCKET=legalrag-fyp.firebasestorage.app
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=1052669551593
+REACT_APP_FIREBASE_APP_ID=1:1052669551593:web:ab37c3fc4b29ecc8a7a178
+REACT_APP_FIREBASE_MEASUREMENT_ID=G-6HJL16BLX3
+
+# Leave blank to use the CRA dev proxy / nginx same-origin routing.
+REACT_APP_API_URL=

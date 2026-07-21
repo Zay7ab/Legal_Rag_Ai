@@ -1,0 +1,16 @@
+{
+  "chat": true,
+  "search": true,
+  "docs": true,
+  "rights": true,
+  "faq": true,
+  "glossary": true,
+  "penalty": true,
+  "finder": true,
+  "scanner": true,
+  "booking": true,
+  "casetrack": true,
+  "news": true,
+  "registration": true,
+  "google_auth": true
+}

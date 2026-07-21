@@ -1,0 +1,81 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL ───────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: legalai-db
+    environment:
+      POSTGRES_DB: legalai
+      POSTGRES_USER: legalai
+      POSTGRES_PASSWORD: legalai_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legalai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Redis (shared rate-limit store) ──────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: legalai-redis
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ── FastAPI Backend ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: legalai-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./backend/data:/app/data
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - DATABASE_URL=postgresql://legalai:legalai_pass@db:5432/legalai
+      # No default: the app refuses to start in production without a real
+      # secret, and `?err` makes compose fail loudly instead of silently
+      # shipping the old placeholder value.
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?set JWT_SECRET_KEY in .env - generate with: python -c "import secrets; print(secrets.token_hex(32))"}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-}
+      - REDIS_URL=redis://redis:6379/0
+      - APP_ENV=${APP_ENV:-development}
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:80
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── React Frontend ───────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./react-frontend
+      dockerfile: Dockerfile
+    container_name: legalai-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

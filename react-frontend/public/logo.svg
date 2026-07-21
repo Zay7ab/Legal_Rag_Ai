@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">Legal Rag Ai</title>
+
+  <!--
+    Rebuilt as vector from the original raster.
+
+    Palette sampled from the source so it stays the same mark, not a reinterpretation:
+      #04332E  ground        #EBB542 / #C58834  brass scales
+      #85D6A8 / #72C499  mint documents & bubbles
+      #3F7165  circuit traces
+
+    Why vector: crisp at 16px (favicon) and 512px (PWA/store) from one 4KB file,
+    where the 600px PNG was soft above its native size and had no small-size
+    legibility. Geometry is redrawn on a 512 grid — true verticals, symmetric
+    beam, real chain links — rather than traced.
+  -->
+
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F5C65A"/>
+      <stop offset="0.5" stop-color="#EBB542"/>
+      <stop offset="1" stop-color="#C58834"/>
+    </linearGradient>
+    <linearGradient id="brassBeam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C58834"/>
+      <stop offset="0.5" stop-color="#F5C65A"/>
+      <stop offset="1" stop-color="#C58834"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8FE0B3"/>
+      <stop offset="1" stop-color="#6BBE92"/>
+    </linearGradient>
+    <radialGradient id="ground" cx="0.5" cy="0.42" r="0.75">
+      <stop offset="0" stop-color="#0A473E"/>
+      <stop offset="1" stop-color="#04332E"/>
+    </radialGradient>
+    <!-- Soft lift so the mint cards read as floating above the board, as in the original -->
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feColorMatrix in="b" type="matrix"
+        values="0 0 0 0 0.35  0 0 0 0 0.87  0 0 0 0 0.60  0 0 0 0.5 0" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="disc"><circle cx="256" cy="256" r="248"/></clipPath>
+  </defs>
+
+  <circle cx="256" cy="256" r="248" fill="url(#ground)"/>
+
+  <g clip-path="url(#disc)">
+    <!-- ── Circuit board ──────────────────────────────────────────────────
+         Traces route toward the scales: the mark's idea is that the law is
+         computed, so the lines should arrive somewhere, not just decorate. -->
+    <g stroke="#3F7165" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">
+      <path d="M52 214 H120 L146 188 H196"/>
+      <path d="M64 300 H108 L134 326 H186"/>
+      <path d="M96 152 H150 L172 130"/>
+      <path d="M84 384 H140 L164 360 H208"/>
+      <path d="M460 214 H392 L366 188 H318"/>
+      <path d="M448 300 H404 L378 326 H326"/>
+      <path d="M416 152 H362 L340 130"/>
+      <path d="M428 384 H372 L348 360 H304"/>
+      <path d="M256 456 V424 M200 440 H232 L256 416"/>
+      <path d="M312 440 H280"/>
+      <path d="M146 240 H104 L78 266"/>
+      <path d="M366 240 H408 L434 266"/>
+    </g>
+    <!-- concentric board rings -->
+    <g stroke="#3F7165" fill="none" opacity="0.35">
+      <circle cx="256" cy="256" r="206" stroke-width="2"/>
+      <circle cx="256" cy="256" r="232" stroke-width="2"/>
+    </g>
+    <!-- nodes -->
+    <g fill="#3F7165">
+      <circle cx="52" cy="214" r="9"/><circle cx="64" cy="300" r="7"/>
+      <circle cx="96" cy="152" r="6"/><circle cx="84" cy="384" r="9"/>
+      <circle cx="460" cy="214" r="9"/><circle cx="448" cy="300" r="7"/>
+      <circle cx="416" cy="152" r="6"/><circle cx="428" cy="384" r="9"/>
+      <circle cx="78" cy="266" r="11"/><circle cx="434" cy="266" r="11"/>
+      <circle cx="256" cy="456" r="8"/><circle cx="200" cy="440" r="6"/>
+      <circle cx="312" cy="440" r="6"/><circle cx="172" cy="130" r="7"/>
+      <circle cx="340" cy="130" r="7"/>
+    </g>
+    <g fill="#85D6A8" opacity="0.55">
+      <circle cx="146" cy="188" r="5"/><circle cx="366" cy="188" r="5"/>
+      <circle cx="134" cy="326" r="5"/><circle cx="378" cy="326" r="5"/>
+      <circle cx="164" cy="360" r="4"/><circle cx="348" cy="360" r="4"/>
+    </g>
+
+    <!-- ── Documents (mint) ───────────────────────────────────────────── -->
+    <g filter="url(#glow)">
+      <!-- top-left, tilted like the original -->
+      <g transform="rotate(-8 138 128)">
+        <path d="M96 84 h74 a6 6 0 0 1 6 6 v82 l-20 18 h-60 a6 6 0 0 1 -6 -6 V90 a6 6 0 0 1 6 -6 z" fill="url(#mint)"/>
+        <path d="M176 172 l-20 18 v-12 a6 6 0 0 1 6 -6 z" fill="#4E9A73"/>
+        <g stroke="#2C6B4E" stroke-width="4.5" stroke-linecap="round" opacity="0.75">
+          <path d="M110 104 H160"/><path d="M110 120 H162"/><path d="M110 136 H150"/><path d="M110 152 H156"/>
+        </g>
+      </g>
+      <!-- right, tilted the other way -->
+      <g transform="rotate(7 402 320)">
+        <path d="M362 276 h74 a6 6 0 0 1 6 6 v82 l-20 18 h-60 a6 6 0 0 1 -6 -6 V282 a6 6 0 0 1 6 -6 z" fill="url(#mint)"/>
+        <path d="M442 364 l-20 18 v-12 a6 6 0 0 1 6 -6 z" fill="#4E9A73"/>
+        <g stroke="#2C6B4E" stroke-width="4.5" stroke-linecap="round" opacity="0.75">
+          <path d="M376 296 H426"/><path d="M376 312 H428"/><path d="M376 328 H416"/><path d="M376 344 H422"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ── Speech bubbles (mint) ──────────────────────────────────────── -->
+    <g filter="url(#glow)">
+      <!-- top-right -->
+      <g>
+        <path d="M348 108 h84 a14 14 0 0 1 14 14 v52 a14 14 0 0 1 -14 14 h-46 l-24 22 v-22 h-14 a14 14 0 0 1 -14 -14 v-52 a14 14 0 0 1 14 -14 z" fill="url(#mint)"/>
+        <g fill="#2C6B4E" opacity="0.8">
+          <path d="M372 134 q-10 6 -10 18 h9 v14 h-16 v-14 q0 -14 17 -22 z"/>
+          <path d="M404 134 q-10 6 -10 18 h9 v14 h-16 v-14 q0 -14 17 -22 z"/>
+        </g>
+      </g>
+      <!-- bottom-left -->
+      <g>
+        <path d="M96 316 h78 a14 14 0 0 1 14 14 v46 a14 14 0 0 1 -14 14 h-40 l-22 20 v-20 h-16 a14 14 0 0 1 -14 -14 v-46 a14 14 0 0 1 14 -14 z" fill="url(#mint)"/>
+        <g fill="#2C6B4E" opacity="0.8">
+          <path d="M124 340 q-10 6 -10 17 h9 v13 h-15 v-13 q0 -13 16 -21 z"/>
+          <path d="M154 340 q-10 6 -10 17 h9 v13 h-15 v-13 q0 -13 16 -21 z"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ── Scales of justice (brass) ──────────────────────────────────────
+         The subject of the mark, so it sits highest and is drawn tightest. -->
+    <g>
+      <!-- base -->
+      <path d="M196 388 h120 a8 8 0 0 1 8 8 v10 h-136 v-10 a8 8 0 0 1 8 -8 z" fill="url(#brass)"/>
+      <path d="M214 362 h84 l10 26 h-104 z" fill="url(#brass)"/>
+      <!-- column -->
+      <rect x="247" y="150" width="18" height="212" rx="4" fill="url(#brass)"/>
+      <!-- finial -->
+      <circle cx="256" cy="140" r="13" fill="url(#brass)"/>
+      <circle cx="256" cy="136" r="4" fill="#F7D584" opacity="0.9"/>
+      <!-- beam -->
+      <rect x="140" y="168" width="232" height="11" rx="5.5" fill="url(#brassBeam)"/>
+      <circle cx="256" cy="173" r="9" fill="url(#brass)"/>
+      <circle cx="146" cy="173" r="6" fill="url(#brass)"/>
+      <circle cx="366" cy="173" r="6" fill="url(#brass)"/>
+
+      <!-- chains: real V-strings to each pan rim, not a vague triangle -->
+      <g stroke="#D9A63E" stroke-width="3.5" fill="none" stroke-linecap="round">
+        <path d="M146 179 L106 246 M146 179 L186 246 M146 179 V246"/>
+        <path d="M366 179 L326 246 M366 179 L406 246 M366 179 V246"/>
+      </g>
+      <!-- pans -->
+      <path d="M100 246 h92 a4 4 0 0 1 4 5 q-10 40 -50 40 t-50 -40 a4 4 0 0 1 4 -5 z" fill="url(#brass)"/>
+      <path d="M320 246 h92 a4 4 0 0 1 4 5 q-10 40 -50 40 t-50 -40 a4 4 0 0 1 4 -5 z" fill="url(#brass)"/>
+      <!-- pan rims catch the light -->
+      <g fill="#F7D584" opacity="0.55">
+        <rect x="100" y="246" width="96" height="4" rx="2"/>
+        <rect x="320" y="246" width="96" height="4" rx="2"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- crisp edge -->
+  <circle cx="256" cy="256" r="246.5" fill="none" stroke="#0A473E" stroke-width="3"/>
+</svg>
